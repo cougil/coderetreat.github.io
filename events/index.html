@@ -1,144 +1,29 @@
 ---
-layout: default
+layout: base
+title: Global Day Of Coderetreat
+audience: participants
+extraStyles: ["/js/bundled/events.css"]
+description: |
+    Global Day Of Coderetreat is a community event happening on November 6 - November 7 2020.
+    Join this year and practice your skills, embrace new paradigms and get to meet new people
+    from all over the world!
 ---
 
-<div id="map">
-    <div id="popup"></div>
+<div class="container my-5">
+    <div>
+        <p class="lead">Global Day Of Coderetreat is a community event happening on <strong>November 6 - November 7
+                2020</strong>. Join this year and practice your skills, embrace new paradigms and get to meet new people
+            from all over the world!</p>
+        <p>With COVID-19 having a severe impact on the availability of on-site events, we're embracing the virtual
+            events we had in the past more than ever. We encourage you to stay safe. If an on-site event
+            isn't for you, we hope you'll find a remote event that matches your timezone.</p>
+        <p>If you're considering organizing your own event, we're here to support you on the journey of
+                organizing your first coderetreat. Head over to the <a
+                        href="{% link facilitators/index.html %}">Facilitators Section</a> for Training events, checklists,
+                facilitation videos and more!</p>
+        
+    </div>
 </div>
-
-<h1>GDCR events in 2018</h1>
-{% assign events_with_location = site.data.events_gdcr2018 | where_exp: 'event', 'event.location != "virtual"'  %}
-{% assign virtual_events = site.data.events_gdcr2018 | where_exp: 'event', 'event.location == "virtual"'  %}
-{% assign countries = events_with_location | map: 'location' | map: 'country' | uniq | sort %}
-
-
-<form class="pure-form">
-    <fieldset>
-        <select id="gdcrCountry" style="font-family: sans-serif;">
-            <option selected disabled>Select your country...</option>
-            <option value="none">Show All</option>
-            <option disabled>-------------</option>
-            <option value="virtual">Virtual Events</option>
-            {% for country in countries %}
-            <option>{{ country }}</option>
-            {% endfor %}
-        </select>
-    </fieldset>
-</form>
-<table id="events-by-country">
-    <thead>
-    <tr>
-        <th>Country</th>
-        <th>City</th>
-        <th>Title</th>
-        <th>Facilitators</th>
-        <th>Sponsors</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for event in virtual_events %}
-    <tr data-country="virtual">
-        <td colspan="2">Virtual</td>
-        <td><a href="{{ event.url }}">{{ event.title }}</a></td>
-        <td>
-            {% assign loopCount = event.moderators | size | minus: 1 %}
-            {% for i in (0..loopCount) %}
-            {% assign moderator = event.moderators[i] %}
-            {% assign first_char = moderator | slice: 0 %}
-            {% if first_char == '@' %}
-            {% assign sizeWithoutAt = moderator | size | minus: 1 %}
-            {% assign handle = moderator | slice: 1, sizeWithoutAt %}
-            <a href="https://twitter.com/{{ handle }}">{{ moderator }}</a>
-            {% else %}
-            {{ moderator }}
-            {% endif %}
-            {% if i != loopCount %}, {% endif %}
-            {% endfor %}
-        </td>
-
-
-        <td>
-            {%- assign loopCount = event.sponsors | size | minus: 1 -%}
-            {%- for i in (0..loopCount) -%}
-            {%- assign sponsor = event.sponsors[i] -%}
-            {%- assign first_char = sponsor | slice: 0 -%}
-            {%- if first_char == '@' -%}
-            {%- assign sizeWithoutAt = sponsor | size | minus: 1 -%}
-            {%- assign handle = sponsor | slice: 1, sizeWithoutAt -%}
-            <a href="https://twitter.com/{{ handle }}">{{ sponsor }}</a>
-            {%- else -%}
-            {{- sponsor -}}
-            {%- endif -%}
-            {%- if i != loopCount -%}, {%- endif -%}
-            {%- endfor -%}
-        </td>
-
-
-    </tr>
-    {% endfor %}
-    {% assign events = events_with_location | where_exp: 'name', '1' | sort: 'location.city' | sort: 'location.country' %}
-    {% for event in events %}
-    <tr data-country="{{event.location.country}}">
-        <td>{{ event.location.country }}</td>
-        <td>{{ event.location.city }}</td>
-        <td><a href="{{ event.url }}">{{ event.title }}</a></td>
-        <td>
-            {% assign loopCount = event.moderators | size | minus: 1 %}
-            {% for i in (0..loopCount) %}
-            {% assign moderator = event.moderators[i] %}
-            {% assign first_char = moderator | slice: 0 %}
-            {% if first_char == '@' %}
-            {% assign sizeWithoutAt = moderator | size | minus: 1 %}
-            {% assign handle = moderator | slice: 1, sizeWithoutAt %}
-            <a href="https://twitter.com/{{ handle }}">{{ moderator }}</a>
-            {% else %}
-            {{ moderator }}
-            {% endif %}
-            {% if i != loopCount %}, {% endif %}
-            {% endfor %}
-        </td>
-
-
-        <td>
-            {%- assign loopCount = event.sponsors | size | minus: 1 -%}
-            {%- for i in (0..loopCount) -%}
-            {%- assign sponsor = event.sponsors[i] -%}
-            {%- assign first_char = sponsor | slice: 0 -%}
-            {%- if first_char == '@' -%}
-            {%- assign sizeWithoutAt = sponsor | size | minus: 1 -%}
-            {%- assign handle = sponsor | slice: 1, sizeWithoutAt -%}
-            <a href="https://twitter.com/{{ handle }}">{{ sponsor }}</a>
-            {%- else -%}
-            {{- sponsor -}}
-            {%- endif -%}
-            {%- if i != loopCount -%}, {%- endif -%}
-            {%- endfor -%}
-        </td>
-
-
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
-
-<script>
-    $(function () {
-        $.get('/events/gdcr2018.json', function (eventsJson) {
-            var gdcrEvents = mapEventsDataToMapFormat(eventsJson);
-            addEventsToMap(gdcrEvents);
-        });
-
-        $('#gdcrCountry').on('change', function (e) {
-            var filter = e.target.value;
-            var rows = $('tbody tr');
-            var isDisabled = filter === 'none';
-
-            for (var i = 0; i < rows.length; i++) {
-                row = rows[i];
-                ctry = row.getAttribute("data-country");
-                row.classList.toggle('hidden', !(isDisabled || ctry === filter))
-            }
-            ;
-        });
-    });
-</script>
+<div id="events">
+</div>
+<script type="application/javascript" src="{{ "/js/bundled/events.js" | relative_url }}"></script>
